@@ -28,6 +28,7 @@ def init_game() -> None:
             "<p>👤 Your turn! Click a column to drop your piece.</p>"
         )
         st.session_state.pending_ai = False
+        st.session_state.last_ai_column = None
 
 
 def reset_game() -> None:
@@ -39,11 +40,7 @@ def reset_game() -> None:
         "<p>👤 Your turn! Click a column to drop your piece.</p>"
     )
     st.session_state.pending_ai = False
-
-
-def render_interface(status_placeholder, board_placeholder) -> None:
-    status_placeholder.markdown(st.session_state.message, unsafe_allow_html=True)
-    board_placeholder.markdown(board_to_html(st.session_state.board), unsafe_allow_html=True)
+    st.session_state.last_ai_column = None
 
 
 def human_move(column: int) -> None:
@@ -51,6 +48,7 @@ def human_move(column: int) -> None:
         return
 
     board = st.session_state.board
+    st.session_state.last_ai_column = None
     if not is_valid_location(board, column):
         st.session_state.message = (
             "<h3>⚠️ Invalid Move!</h3>"
@@ -111,6 +109,7 @@ def ai_move() -> None:
         row = get_next_open_row(board, column)
 
     drop_piece(board, row, column, AI)
+    st.session_state.last_ai_column = column + 1
 
     if winning_move(board, AI):
         st.session_state.game_over = True
@@ -131,8 +130,19 @@ def ai_move() -> None:
     st.session_state.turn = HUMAN
     st.session_state.pending_ai = False
     st.session_state.message = (
-        "<h3>👤 Your turn!</h3>"
-        "<p>Click a column to drop your piece.</p>"
+        f"<h3>🤖 Computer played column {st.session_state.last_ai_column}</h3>"
+        "<p>👤 Your turn! Pick your next column.</p>"
+    )
+
+
+def refresh_ui(status_placeholder, board_placeholder) -> None:
+    status_placeholder.markdown(
+        f'<div class="status-box">{st.session_state.message}</div>',
+        unsafe_allow_html=True,
+    )
+    board_placeholder.markdown(
+        f'<div class="board-container">{board_to_html(st.session_state.board)}</div>',
+        unsafe_allow_html=True,
     )
 
 
@@ -178,23 +188,25 @@ def main() -> None:
     
     /* Status message styling */
     .status-box {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 10px;
+        background: #fff;
+        padding: 1.25rem 1rem;
+        border-radius: 12px;
         border-left: 4px solid #667eea;
+        box-shadow: 0 2px 6px rgba(102, 126, 234, 0.15);
         margin-bottom: 1rem;
-        text-align: center;
+        text-align: left;
     }
     
     /* Board container */
     .board-container {
         display: flex;
         justify-content: center;
-        margin: 1rem 0;
-        padding: 1rem;
+        margin: 1rem auto;
+        padding: 1rem 1.5rem;
         background: #ffffff;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 520px;
     }
     
     /* Button styling */
@@ -235,16 +247,30 @@ def main() -> None:
     /* Column number labels */
     .column-label {
         text-align: center;
-        font-weight: bold;
-        color: #667eea;
-        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #4455aa;
+        margin: 0.25rem 0 0.5rem 0;
     }
     
-    /* Main container */
-    .main-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 1rem;
+    .info-card {
+        background: #fff;
+        padding: 1.25rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        border-top: 4px solid #764ba2;
+    }
+    .info-card h4 {
+        margin-top: 0;
+        color: #44337a;
+    }
+    .info-card ul {
+        padding-left: 1.1rem;
+    }
+    .info-card li {
+        margin-bottom: 0.4rem;
+    }
+    .info-card span {
+        color: #4a5568;
     }
     
     /* Responsive adjustments */
@@ -270,63 +296,59 @@ def main() -> None:
         ai_move()
         st.session_state.pending_ai = False
 
-    # Status message
-    status_placeholder = st.empty()
-    status_placeholder.markdown(
-        f'<div class="status-box">{st.session_state.message}</div>',
-        unsafe_allow_html=True
+    left_col, middle_col, right_col = st.columns([1.2, 2.4, 1.2])
+
+    status_placeholder = left_col.empty()
+    info_placeholder = right_col.empty()
+    board_placeholder = middle_col.empty()
+
+    refresh_ui(status_placeholder, board_placeholder)
+
+    info_placeholder.markdown(
+        """
+        <div class="info-card">
+            <h4>How to Play</h4>
+            <ul>
+                <li>Drop discs to connect four in a row.</li>
+                <li>Use the drop buttons to pick a column.</li>
+                <li>Yellow AI responds instantly using depth-3 Minimax.</li>
+                <li>Game ends when someone connects four or the grid fills up.</li>
+            </ul>
+            <span>Tip: control the center to create multiple threats.</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    # Board display
-    board_placeholder = st.empty()
-    board_placeholder.markdown(
-        f'<div class="board-container">{board_to_html(st.session_state.board)}</div>',
-        unsafe_allow_html=True
-    )
-
-    # Column number labels
     cols = len(st.session_state.board[0])
-    label_cols = st.columns(cols)
+    label_cols = middle_col.columns(cols)
     for idx, col in enumerate(label_cols):
         col.markdown(
             f'<div class="column-label">{idx + 1}</div>',
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
-    # Column buttons
-    button_row = st.columns(cols)
+    button_row = middle_col.columns(cols)
     for idx, column in enumerate(button_row):
         disabled = (
             st.session_state.game_over
             or st.session_state.turn != HUMAN
             or not is_valid_location(st.session_state.board, idx)
         )
-        button_text = f"⬇ Drop" if not disabled else "—"
+        button_text = "⬇ Drop" if not disabled else "—"
         if column.button(button_text, key=f"col_{idx}", disabled=disabled):
             human_move(idx)
-            status_placeholder.markdown(
-                f'<div class="status-box">{st.session_state.message}</div>',
-                unsafe_allow_html=True
-            )
-            board_placeholder.markdown(
-                f'<div class="board-container">{board_to_html(st.session_state.board)}</div>',
-                unsafe_allow_html=True
-            )
+            refresh_ui(status_placeholder, board_placeholder)
 
-    # New Game button
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🔄 New Game", use_container_width=True):
-            reset_game()
-            status_placeholder.markdown(
-                f'<div class="status-box">{st.session_state.message}</div>',
-                unsafe_allow_html=True
-            )
-            board_placeholder.markdown(
-                f'<div class="board-container">{board_to_html(st.session_state.board)}</div>',
-                unsafe_allow_html=True
-            )
-            st.rerun()
+    spacer = middle_col.empty()
+    spacer.markdown("<div style='margin-top:0.5rem;'></div>", unsafe_allow_html=True)
+
+    new_game_container = middle_col.container()
+    if new_game_container.button("🔄 New Game", use_container_width=True):
+        reset_game()
+        refresh_ui(status_placeholder, board_placeholder)
+        st.session_state.last_ai_column = None
+        st.rerun()
 
 
 if __name__ == "__main__":
