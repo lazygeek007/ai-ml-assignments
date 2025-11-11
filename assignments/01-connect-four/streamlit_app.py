@@ -279,7 +279,7 @@ def main() -> None:
                 or st.session_state.turn != HUMAN
                 or not is_valid_location(st.session_state.board, idx)
             )
-            button_text = "⬇ Drop" if not disabled else "—"
+            button_text = str(idx) if not disabled else "—"
             if column.button(button_text, key=f"col_{idx}", disabled=disabled):
                 moved = human_move(idx)
                 if moved and not st.session_state.game_over:
