@@ -174,46 +174,56 @@ def is_terminal_node(board: Sequence[Sequence[int]]) -> bool:
 # Minimax search
 # --------------------------------------------------------------------------- #
 def minimax(board: Sequence[Sequence[int]], depth: int, maximizing_player: bool) -> Tuple[int, Optional[int]]:
-    """Depth-limited minimax returning (score, column)."""
+    """
+    Depth-limited minimax algorithm for Connect Four.
+    
+    Args:
+        board: Current game board state.
+        depth: Remaining search depth.
+        maximizing_player: True if maximizing (AI), False if minimizing (Human).
+        
+    Returns:
+        Tuple of (score, best_column). Column is None for terminal/leaf nodes.
+    """
     valid_locations = get_valid_locations(board)
     terminal = is_terminal_node(board)
 
+    # Base case: terminal node or max depth reached
     if depth == 0 or terminal:
         if terminal:
             if winning_move(board, AI):
                 return (math.inf, None)
             if winning_move(board, HUMAN):
                 return (-math.inf, None)
-            return (0, None)
+            return (0, None)  # Draw
         return (score_position(board, AI), None)
 
-    if maximizing_player:
-        value = -math.inf
-        best_col = random.choice(valid_locations)
-        for col in valid_locations:
-            row = get_next_open_row(board, col)
-            if row is None:
-                continue
-            board_copy = copy_board(board)
-            drop_piece(board_copy, row, col, AI)
-            new_score, _ = minimax(board_copy, depth - 1, False)
-            if new_score > value:
-                value = new_score
-                best_col = col
-        return value, best_col
+    # Determine player piece and initial value based on player type
+    piece = AI if maximizing_player else HUMAN
+    value = -math.inf if maximizing_player else math.inf
+    best_col = random.choice(valid_locations) if valid_locations else None
 
-    value = math.inf
-    best_col = random.choice(valid_locations)
+    # Evaluate all valid moves
     for col in valid_locations:
         row = get_next_open_row(board, col)
         if row is None:
             continue
+        
+        # Make move on copy of board
         board_copy = copy_board(board)
-        drop_piece(board_copy, row, col, HUMAN)
-        new_score, _ = minimax(board_copy, depth - 1, True)
-        if new_score < value:
-            value = new_score
-            best_col = col
+        drop_piece(board_copy, row, col, piece)
+        new_score, _ = minimax(board_copy, depth - 1, not maximizing_player)
+        
+        # Update best move based on player type
+        if maximizing_player:
+            if new_score > value:
+                value = new_score
+                best_col = col
+        else:
+            if new_score < value:
+                value = new_score
+                best_col = col
+
     return value, best_col
 
 
