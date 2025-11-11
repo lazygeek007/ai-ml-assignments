@@ -232,17 +232,23 @@ def ai_decide_move(board: Sequence[Sequence[int]], depth: int = 3) -> int:
 def board_to_html(board: Sequence[Sequence[int]]) -> str:
     """Render the board as HTML table (mirrors notebook styling)."""
     html = []
-    # Column labels at the top
-    html.append("<div style='text-align: center; margin-bottom: 8px;'>")
+    html.append("<div style='display: inline-block;'>")
+    
+    # Column labels at the top using table structure for perfect alignment
+    html.append("<table style='border-collapse: collapse; margin: 0 auto 8px auto;'>")
+    html.append("<tr>")
     for col in range(COLS):
         html.append(
-            "<span style='display: inline-block; width: 50px; text-align: center; "
-            "font-weight: bold; font-size: 1.1rem; color: #4455aa;'>"
-            f"{col}</span>"
+            "<td style='width: 50px; height: 30px; text-align: center; "
+            "font-weight: bold; font-size: 1.1rem; color: #4455aa; "
+            "border: none; padding: 0;'>"
+            f"{col}</td>"
         )
-    html.append("</div>")
+    html.append("</tr>")
+    html.append("</table>")
     
-    html.append("<table style='border-collapse: collapse; margin: 20px auto;'>")
+    # Game board table
+    html.append("<table style='border-collapse: collapse; margin: 0 auto;'>")
     for row in range(ROWS):
         html.append("<tr>")
         for col in range(COLS):
@@ -254,6 +260,7 @@ def board_to_html(board: Sequence[Sequence[int]]) -> str:
             )
         html.append("</tr>")
     html.append("</table>")
+    html.append("</div>")
 
     return "".join(html)
 
