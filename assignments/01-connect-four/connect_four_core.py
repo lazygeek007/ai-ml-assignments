@@ -232,10 +232,10 @@ def ai_decide_move(board: Sequence[Sequence[int]], depth: int = 3) -> int:
 def board_to_html(board: Sequence[Sequence[int]]) -> str:
     """Render the board as HTML table (mirrors notebook styling)."""
     html = []
-    html.append("<div style='display: inline-block;'>")
+    html.append("<div class='board-table-wrapper' style='display: inline-block;'>")
     
     # Column labels at the top using table structure for perfect alignment
-    html.append("<table style='border-collapse: collapse; margin: 0 auto 8px auto;'>")
+    html.append("<table class='board-labels-table' style='border-collapse: collapse; margin: 0 auto 8px auto;'>")
     html.append("<tr>")
     for col in range(COLS):
         html.append(
@@ -248,7 +248,7 @@ def board_to_html(board: Sequence[Sequence[int]]) -> str:
     html.append("</table>")
     
     # Game board table
-    html.append("<table style='border-collapse: collapse; margin: 0 auto;'>")
+    html.append("<table class='board-game-table' style='border-collapse: collapse; margin: 0 auto;'>")
     for row in range(ROWS):
         html.append("<tr>")
         for col in range(COLS):

@@ -193,6 +193,25 @@ def main() -> None:
             margin: 0.5rem auto 1rem auto;
             width: 100%;
         }
+        /* Ensure board table and buttons use same container width */
+        .board-container > div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .board-container table {
+            margin: 0 auto !important;
+        }
+        /* Align table wrapper and button container */
+        .board-table-wrapper {
+            width: 350px !important;
+        }
+        .board-game-table {
+            width: 350px !important;
+        }
+        .board-labels-table {
+            width: 350px !important;
+        }
         .stButton > button {
             width: 100%;
             height: 48px;
@@ -210,12 +229,14 @@ def main() -> None:
         }
         .stButton > button:disabled { opacity: 0.4; cursor: not-allowed; }
         /* Button alignment - align buttons directly under grid columns */
+        /* Table is 7 columns × 50px = 350px total width */
         .board-container [data-testid="stHorizontalBlock"] {
             display: flex !important;
             justify-content: center !important;
             gap: 0 !important;
             margin: 0.5rem auto 0 auto !important;
-            width: fit-content !important;
+            width: 350px !important;
+            max-width: 350px !important;
         }
         .board-container [data-testid="column"] {
             padding-left: 0 !important;
@@ -223,6 +244,8 @@ def main() -> None:
             margin: 0 !important;
             width: 50px !important;
             flex: 0 0 50px !important;
+            min-width: 50px !important;
+            max-width: 50px !important;
         }
         /* Ensure buttons match grid column width exactly */
         .board-container [data-testid="column"] .stButton {
@@ -234,6 +257,7 @@ def main() -> None:
             max-width: 50px !important;
             padding: 0.4rem 0.2rem;
             font-size: 0.95rem;
+            box-sizing: border-box !important;
         }
         .info-card {
             background: #fff;
