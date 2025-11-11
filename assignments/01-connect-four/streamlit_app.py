@@ -208,6 +208,22 @@ def main() -> None:
             box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
         }
         .stButton > button:disabled { opacity: 0.4; cursor: not-allowed; }
+        /* Button alignment - reduce spacing between buttons */
+        .board-container [data-testid="column"] {
+            padding-left: 0.15rem !important;
+            padding-right: 0.15rem !important;
+        }
+        /* Ensure buttons are compact and aligned with grid */
+        .board-container [data-testid="column"] .stButton {
+            width: 100%;
+        }
+        .board-container [data-testid="column"] .stButton > button {
+            width: 100%;
+            min-width: 48px;
+            max-width: 52px;
+            padding: 0.4rem 0.3rem;
+            font-size: 0.95rem;
+        }
         .info-card {
             background: #fff;
             padding: 1.25rem;
