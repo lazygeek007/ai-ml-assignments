@@ -8,10 +8,6 @@ A two-player Connect Four game (7x6 grid) where a human competes against a compu
 
 **Play the game:** [https://connectfourgame.streamlit.app/](https://connectfourgame.streamlit.app/)
 
-## Screenshot
-
-![Connect Four Game](screenshot.png)
-
 ## Project Structure
 
 - `ConnectFourGame _Final.ipynb` – Full notebook implementation with interactive console play
