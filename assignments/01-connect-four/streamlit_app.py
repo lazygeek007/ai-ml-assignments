@@ -220,12 +220,12 @@ def main() -> None:
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             border-top: 4px solid #764ba2;
         }
-        .info-card h4 { margin top: 0; color: #44337a; }
+        .info-card h4 { margin-top: 0; color: #44337a; }
         .info-card ul { padding-left: 1.1rem; }
         .info-card li { margin-bottom: 0.4rem; }
         .info-card span { color: #4a5568; }
         @media (max-width: 768px) {
-            .game-header h1 { font size: 1.5rem; }
+            .game-header h1 { font-size: 1.5rem; }
         }
         </style>
         """,
@@ -256,7 +256,7 @@ def main() -> None:
         st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
         if st.button("🔄 New Game", use_container_width=True):
             reset_game()
-            st.experimental_rerun()
+            st.rerun()
 
     with info_col:
         st.markdown(
@@ -296,7 +296,7 @@ def main() -> None:
                 moved = human_move(idx)
                 if moved and not st.session_state.game_over:
                     ai_move()
-                st.experimental_rerun()
+                st.rerun()
 
 
 if __name__ == "__main__":
