@@ -14,6 +14,7 @@ ai-ml-assignments/
 │   │   ├── README.md
 │   │   ├── ConnectFourGame _Final.ipynb
 │   │   ├── streamlit_app.py
+│   │   ├── connect_four_core.py
 │   │   └── requirements.txt
 │   └── ...
 ├── data/               # optional: small sample datasets or download scripts

@@ -8,11 +8,12 @@ Build a two-player Connect Four game (7x6 grid) where a human competes against a
 
 - `ConnectFourGame _Final.ipynb` – full notebook implementation with interactive console play.
 - `streamlit_app.py` – Streamlit web application for live demos.
-- `requirements.txt` – minimal dependencies (`streamlit`, `numpy`) for deploying the app.
+- `connect_four_core.py` – shared logic module consumed by both notebook and Streamlit interfaces.
+- `requirements.txt` – minimal dependencies (`streamlit`) for deploying the app.
 
 ## Notebook Walkthrough
 
-- 7x6 grid representation using NumPy arrays.
+- 7x6 grid representation via reusable helpers from `connect_four_core.py`.
 - Human vs. computer gameplay loop with validated moves.
 - Depth-3 Minimax agent using handcrafted heuristics (win/block/center control).
 - Win/draw detection after every turn with clear board visualization.
