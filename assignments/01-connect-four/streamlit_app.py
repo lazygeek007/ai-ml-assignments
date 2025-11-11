@@ -188,7 +188,8 @@ def main() -> None:
         }
         .board-container {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             margin: 0.5rem auto 1rem auto;
             width: 100%;
         }
@@ -208,27 +209,31 @@ def main() -> None:
             box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
         }
         .stButton > button:disabled { opacity: 0.4; cursor: not-allowed; }
-        /* Button alignment - minimize spacing between buttons */
+        /* Button alignment - align buttons directly under grid columns */
+        .board-container [data-testid="stHorizontalBlock"] {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 0 !important;
+            margin: 0.5rem auto 0 auto !important;
+            width: fit-content !important;
+        }
         .board-container [data-testid="column"] {
             padding-left: 0 !important;
             padding-right: 0 !important;
-            margin-left: 0.1rem !important;
-            margin-right: 0.1rem !important;
+            margin: 0 !important;
+            width: 50px !important;
+            flex: 0 0 50px !important;
         }
-        /* Ensure buttons are compact and aligned with grid */
+        /* Ensure buttons match grid column width exactly */
         .board-container [data-testid="column"] .stButton {
-            width: 100%;
+            width: 100% !important;
         }
         .board-container [data-testid="column"] .stButton > button {
-            width: 100%;
-            min-width: 48px;
-            max-width: 50px;
+            width: 50px !important;
+            min-width: 50px !important;
+            max-width: 50px !important;
             padding: 0.4rem 0.2rem;
             font-size: 0.95rem;
-        }
-        /* Override Streamlit's column gap */
-        .board-container [data-testid="stHorizontalBlock"] {
-            gap: 0.2rem !important;
         }
         .info-card {
             background: #fff;
