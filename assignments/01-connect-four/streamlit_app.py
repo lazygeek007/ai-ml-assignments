@@ -203,11 +203,13 @@ def main() -> None:
             margin: 0 auto !important;
         }
         /* Align table wrapper and button container */
+        /* With border-collapse, table width is 7 × 50px = 350px */
         .board-table-wrapper {
             width: 350px !important;
         }
         .board-game-table {
             width: 350px !important;
+            box-sizing: border-box !important;
         }
         .board-labels-table {
             width: 350px !important;
@@ -229,7 +231,7 @@ def main() -> None:
         }
         .stButton > button:disabled { opacity: 0.4; cursor: not-allowed; }
         /* Button alignment - align buttons directly under grid columns */
-        /* Table is 7 columns × 50px = 350px total width */
+        /* Table is 7 columns × 50px = 350px (borders are collapsed) */
         .board-container [data-testid="stHorizontalBlock"] {
             display: flex !important;
             justify-content: center !important;
