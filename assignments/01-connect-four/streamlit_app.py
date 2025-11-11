@@ -4,7 +4,6 @@ import streamlit as st
 
 from connect_four_core import (
     AI,
-    EMPTY,
     HUMAN,
     ai_decide_move,
     board_full,
@@ -27,7 +26,6 @@ def init_game() -> None:
             "<h3>🎮 Connect Four Game</h3>"
             "<p>👤 Your turn! Click a column to drop your piece.</p>"
         )
-        st.session_state.pending_ai = False
         st.session_state.last_ai_column = None
 
 
@@ -39,29 +37,29 @@ def reset_game() -> None:
         "<h3>🎮 New Game Started!</h3>"
         "<p>👤 Your turn! Click a column to drop your piece.</p>"
     )
-    st.session_state.pending_ai = False
     st.session_state.last_ai_column = None
 
 
-def human_move(column: int) -> None:
+def human_move(column: int) -> bool:
     if st.session_state.game_over or st.session_state.turn != HUMAN:
-        return
+        return False
 
     board = st.session_state.board
     st.session_state.last_ai_column = None
+
     if not is_valid_location(board, column):
         st.session_state.message = (
             "<h3>⚠️ Invalid Move!</h3>"
             "<p>Column is full or out of range. Please try another column.</p>"
         )
-        return
+        return False
 
     row = get_next_open_row(board, column)
     if row is None:
         st.session_state.message = (
             "<h3>⚠️ Column Full!</h3><p>Please choose another column.</p>"
         )
-        return
+        return False
 
     drop_piece(board, row, column, HUMAN)
 
@@ -71,7 +69,7 @@ def human_move(column: int) -> None:
             "<h3>🎉 CONGRATULATIONS! YOU WON! 🎉</h3>"
             "<p>You connected four — fantastic strategy!</p>"
         )
-        return
+        return True
 
     if board_full(board):
         st.session_state.game_over = True
@@ -79,15 +77,10 @@ def human_move(column: int) -> None:
             "<h3>🤝 IT'S A DRAW! 🤝</h3>"
             "<p>The board is full — great game!</p>"
         )
-        return
+        return True
 
     st.session_state.turn = AI
-    st.session_state.pending_ai = True
-    st.session_state.message = (
-        "<h3>🤖 Computer is thinking…</h3>"
-        "<p>The AI is calculating its move.</p>"
-    )
-    st.experimental_rerun()
+    return True
 
 
 def ai_move() -> None:
@@ -129,7 +122,6 @@ def ai_move() -> None:
         return
 
     st.session_state.turn = HUMAN
-    st.session_state.pending_ai = False
     st.session_state.message = (
         f"<h3>🤖 Computer played column {st.session_state.last_ai_column}</h3>"
         "<p>👤 Your turn! Pick your next column.</p>"
@@ -152,197 +144,121 @@ def main() -> None:
         page_title="Connect Four AI",
         page_icon="🎮",
         layout="centered",
-        initial_sidebar_state="collapsed"
+        initial_sidebar_state="collapsed",
     )
 
-    # Custom CSS for game styling
-    st.markdown("""
-    <style>
-    /* Hide Streamlit default elements */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    
-    /* Header styling */
-    .game-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        color: white;
-    }
-    
-    .game-header h1 {
-        color: white;
-        margin: 0;
-        font-size: 2rem;
-        font-weight: bold;
-    }
-    
-    .game-header p {
-        color: rgba(255, 255, 255, 0.9);
-        margin: 0.5rem 0 0 0;
-        font-size: 1rem;
-    }
-    
-    /* Layout containers */
-    .main-layout {
-        display: flex;
-        gap: 1.5rem;
-        justify-content: center;
-        align-items: flex-start;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 1rem;
-        flex-wrap: wrap;
-    }
-    
-    .status-panel, .info-panel {
-        flex: 1;
-        min-width: 260px;
-    }
-    
-    .board-panel {
-        flex: 1.6;
-        min-width: 340px;
-    }
-    
-    /* Status message styling */
-    .status-box {
-        background: #fff;
-        padding: 1.25rem 1rem;
-        border-radius: 12px;
-        border-left: 4px solid #667eea;
-        box-shadow: 0 2px 6px rgba(102, 126, 234, 0.15);
-        margin-bottom: 1rem;
-        text-align: left;
-    }
-    
-    .board-wrapper {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        padding: 1rem 1.5rem 1.25rem 1.5rem;
-    }
-
-    /* Board container */
-    .board-container {
-        display: flex;
-        justify-content: center;
-        margin: 0.5rem auto 1rem auto;
-        width: 100%;
-        min-width: 320px;
-    }
-
-    /* Button styling */
-    .stButton > button {
-        width: 100%;
-        height: 50px;
-        border-radius: 8px;
-        font-weight: bold;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        border: 2px solid #667eea;
-    }
-    
-    .stButton > button:hover:not(:disabled) {
-        background-color: #667eea;
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-    }
-    
-    .stButton > button:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-    
-    /* New Game button */
-    .new-game-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
-        font-weight: bold;
-        font-size: 1rem;
-        margin-top: 1rem;
-    }
-    
-    /* Column number labels */
-    .column-label {
-        text-align: center;
-        font-weight: 600;
-        color: #4455aa;
-        margin: 0.25rem 0 0.5rem 0;
-    }
-    
-    .info-card {
-        background: #fff;
-        padding: 1.25rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        border-top: 4px solid #764ba2;
-    }
-    .info-card h4 {
-        margin-top: 0;
-        color: #44337a;
-    }
-    .info-card ul {
-        padding-left: 1.1rem;
-    }
-    .info-card li {
-        margin-bottom: 0.4rem;
-    }
-    .info-card span {
-        color: #4a5568;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .game-header h1 {
-            font-size: 1.5rem;
+    st.markdown(
+        """
+        <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        .block-container {
+            max-width: 1200px;
+            padding-left: 2rem;
+            padding-right: 2rem;
         }
-        .main-layout {
-            flex-direction: column;
-            align-items: stretch;
+        .game-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: white;
         }
-    }
-    </style>
-    """, unsafe_allow_html=True)
+        .game-header h1 { margin: 0; font-size: 2rem; font-weight: bold; }
+        .game-header p { margin: 0.5rem 0 0 0; font-size: 1rem; color: rgba(255,255,255,0.9); }
+        .status-box {
+            background: #fff;
+            padding: 1.25rem 1rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.15);
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+        .board-wrapper {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            padding: 1rem 1.5rem 1.25rem 1.5rem;
+            width: 100%;
+        }
+        .board-container {
+            display: flex;
+            justify-content: center;
+            margin: 0.5rem auto 1rem auto;
+            width: 100%;
+        }
+        .stButton > button {
+            width: 100%;
+            height: 48px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 2px solid #667eea;
+        }
+        .stButton > button:hover:not(:disabled) {
+            background-color: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+        .stButton > button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .column-label {
+            text-align: center;
+            font-weight: 600;
+            color: #4455aa;
+            margin: 0.25rem 0 0.5rem 0;
+        }
+        .info-card {
+            background: #fff;
+            padding: 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            border-top: 4px solid #764ba2;
+        }
+        .info-card h4 { margin top: 0; color: #44337a; }
+        .info-card ul { padding-left: 1.1rem; }
+        .info-card li { margin-bottom: 0.4rem; }
+        .info-card span { color: #4a5568; }
+        @media (max-width: 768px) {
+            .game-header h1 { font size: 1.5rem; }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    # Game Header
-    st.markdown("""
-    <div class="game-header">
-        <h1>🎮 Connect Four</h1>
-        <p>Challenge the Minimax AI • First to connect 4 wins!</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div class="game-header">
+            <h1>🎮 Connect Four</h1>
+            <p>Challenge the Minimax AI • First to connect 4 wins!</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     init_game()
 
-    if st.session_state.pending_ai and not st.session_state.game_over:
-        ai_move()
-        st.session_state.pending_ai = False
+    status_col, board_col, info_col = st.columns([1.15, 2.2, 1.15], gap="large")
 
-    left_col, board_col, right_col = st.columns([1.1, 1.8, 1.1], gap="large")
+    status_placeholder = status_col.empty()
+    board_container = board_col.container()
+    board_placeholder = board_container.empty()
 
-    with board_col:
-        board_container = st.container()
-        board_placeholder = board_container.empty()
-
-    status_placeholder = left_col.empty()
     refresh_ui(status_placeholder, board_placeholder)
 
-    with left_col:
+    with status_col:
         st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
         if st.button("🔄 New Game", use_container_width=True):
             reset_game()
             st.experimental_rerun()
 
-    with right_col:
+    with info_col:
         st.markdown(
             """
             <div class="info-card">
@@ -377,10 +293,11 @@ def main() -> None:
             )
             button_text = "⬇ Drop" if not disabled else "—"
             if column.button(button_text, key=f"col_{idx}", disabled=disabled):
-                human_move(idx)
-                return
+                moved = human_move(idx)
+                if moved and not st.session_state.game_over:
+                    ai_move()
+                st.experimental_rerun()
 
 
 if __name__ == "__main__":
     main()
-
