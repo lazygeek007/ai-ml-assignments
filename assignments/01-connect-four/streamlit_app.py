@@ -87,6 +87,7 @@ def human_move(column: int) -> None:
         "<h3>🤖 Computer is thinking…</h3>"
         "<p>The AI is calculating its move.</p>"
     )
+    st.experimental_rerun()
 
 
 def ai_move() -> None:
@@ -141,7 +142,7 @@ def refresh_ui(status_placeholder, board_placeholder) -> None:
         unsafe_allow_html=True,
     )
     board_placeholder.markdown(
-        f'<div class="board-container">{board_to_html(st.session_state.board)}</div>',
+        f'<div class="board-wrapper"><div class="board-container">{board_to_html(st.session_state.board)}</div></div>',
         unsafe_allow_html=True,
     )
 
@@ -186,6 +187,28 @@ def main() -> None:
         font-size: 1rem;
     }
     
+    /* Layout containers */
+    .main-layout {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        align-items: flex-start;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .status-panel, .info-panel {
+        flex: 1;
+        min-width: 260px;
+    }
+    
+    .board-panel {
+        flex: 1.6;
+        min-width: 340px;
+    }
+    
     /* Status message styling */
     .status-box {
         background: #fff;
@@ -197,18 +220,22 @@ def main() -> None:
         text-align: left;
     }
     
+    .board-wrapper {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.5rem 1.25rem 1.5rem;
+    }
+
     /* Board container */
     .board-container {
         display: flex;
         justify-content: center;
-        margin: 1rem auto;
-        padding: 1rem 1.5rem;
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        max-width: 520px;
+        margin: 0.5rem auto 1rem auto;
+        width: 100%;
+        min-width: 320px;
     }
-    
+
     /* Button styling */
     .stButton > button {
         width: 100%;
@@ -278,6 +305,10 @@ def main() -> None:
         .game-header h1 {
             font-size: 1.5rem;
         }
+        .main-layout {
+            flex-direction: column;
+            align-items: stretch;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -296,59 +327,58 @@ def main() -> None:
         ai_move()
         st.session_state.pending_ai = False
 
-    left_col, middle_col, right_col = st.columns([1.2, 2.4, 1.2])
+    left_col, board_col, right_col = st.columns([1.1, 1.8, 1.1], gap="large")
+
+    with board_col:
+        board_container = st.container()
+        board_placeholder = board_container.empty()
 
     status_placeholder = left_col.empty()
-    info_placeholder = right_col.empty()
-    board_placeholder = middle_col.empty()
-
     refresh_ui(status_placeholder, board_placeholder)
 
-    info_placeholder.markdown(
-        """
-        <div class="info-card">
-            <h4>How to Play</h4>
-            <ul>
-                <li>Drop discs to connect four in a row.</li>
-                <li>Use the drop buttons to pick a column.</li>
-                <li>Yellow AI responds instantly using depth-3 Minimax.</li>
-                <li>Game ends when someone connects four or the grid fills up.</li>
-            </ul>
-            <span>Tip: control the center to create multiple threats.</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    with left_col:
+        st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
+        if st.button("🔄 New Game", use_container_width=True):
+            reset_game()
+            st.experimental_rerun()
 
-    cols = len(st.session_state.board[0])
-    label_cols = middle_col.columns(cols)
-    for idx, col in enumerate(label_cols):
-        col.markdown(
-            f'<div class="column-label">{idx + 1}</div>',
+    with right_col:
+        st.markdown(
+            """
+            <div class="info-card">
+                <h4>How to Play</h4>
+                <ul>
+                    <li>Drop discs to connect four in a row.</li>
+                    <li>Use the drop buttons to pick a column.</li>
+                    <li>Yellow AI responds instantly using depth-3 Minimax.</li>
+                    <li>The match ends when someone connects four or the grid fills up.</li>
+                </ul>
+                <span>Tip: claim the center column to create multiple threats.</span>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
 
-    button_row = middle_col.columns(cols)
-    for idx, column in enumerate(button_row):
-        disabled = (
-            st.session_state.game_over
-            or st.session_state.turn != HUMAN
-            or not is_valid_location(st.session_state.board, idx)
-        )
-        button_text = "⬇ Drop" if not disabled else "—"
-        if column.button(button_text, key=f"col_{idx}", disabled=disabled):
-            human_move(idx)
-            refresh_ui(status_placeholder, board_placeholder)
+    with board_container:
+        cols = len(st.session_state.board[0])
+        label_cols = st.columns(cols, gap="small")
+        for idx, col in enumerate(label_cols):
+            col.markdown(
+                f'<div class="column-label">{idx + 1}</div>',
+                unsafe_allow_html=True,
+            )
 
-    spacer = middle_col.empty()
-    spacer.markdown("<div style='margin-top:0.5rem;'></div>", unsafe_allow_html=True)
-
-    new_game_container = middle_col.container()
-    if new_game_container.button("🔄 New Game", use_container_width=True):
-        reset_game()
-        refresh_ui(status_placeholder, board_placeholder)
-        st.session_state.last_ai_column = None
-        st.rerun()
+        button_cols = st.columns(cols, gap="small")
+        for idx, column in enumerate(button_cols):
+            disabled = (
+                st.session_state.game_over
+                or st.session_state.turn != HUMAN
+                or not is_valid_location(st.session_state.board, idx)
+            )
+            button_text = "⬇ Drop" if not disabled else "—"
+            if column.button(button_text, key=f"col_{idx}", disabled=disabled):
+                human_move(idx)
+                return
 
 
 if __name__ == "__main__":
