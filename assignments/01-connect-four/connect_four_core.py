@@ -231,7 +231,18 @@ def ai_decide_move(board: Sequence[Sequence[int]], depth: int = 3) -> int:
 # --------------------------------------------------------------------------- #
 def board_to_html(board: Sequence[Sequence[int]]) -> str:
     """Render the board as HTML table (mirrors notebook styling)."""
-    html = ["<table style='border-collapse: collapse; margin: 20px auto;'>"]
+    html = []
+    # Column labels at the top
+    html.append("<div style='text-align: center; margin-bottom: 8px;'>")
+    for col in range(COLS):
+        html.append(
+            "<span style='display: inline-block; width: 50px; text-align: center; "
+            "font-weight: bold; font-size: 1.1rem; color: #4455aa;'>"
+            f"{col}</span>"
+        )
+    html.append("</div>")
+    
+    html.append("<table style='border-collapse: collapse; margin: 20px auto;'>")
     for row in range(ROWS):
         html.append("<tr>")
         for col in range(COLS):
@@ -243,15 +254,6 @@ def board_to_html(board: Sequence[Sequence[int]]) -> str:
             )
         html.append("</tr>")
     html.append("</table>")
-
-    html.append("<div style='text-align: center; margin-top: 8px;'>")
-    for col in range(COLS):
-        html.append(
-            "<span style='display: inline-block; width: 50px; text-align: center; "
-            "font-weight: bold;'>"
-            f"{col}</span>"
-        )
-    html.append("</div>")
 
     return "".join(html)
 

@@ -157,6 +157,7 @@ def main() -> None:
             max-width: 1200px;
             padding-left: 2rem;
             padding-right: 2rem;
+            padding-top: 1rem;
         }
         .game-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -207,12 +208,6 @@ def main() -> None:
             box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
         }
         .stButton > button:disabled { opacity: 0.4; cursor: not-allowed; }
-        .column-label {
-            text-align: center;
-            font-weight: 600;
-            color: #4455aa;
-            margin: 0.25rem 0 0.5rem 0;
-        }
         .info-card {
             background: #fff;
             padding: 1.25rem;
@@ -277,13 +272,6 @@ def main() -> None:
 
     with board_container:
         cols = len(st.session_state.board[0])
-        label_cols = st.columns(cols, gap="small")
-        for idx, col in enumerate(label_cols):
-            col.markdown(
-                f'<div class="column-label">{idx + 1}</div>',
-                unsafe_allow_html=True,
-            )
-
         button_cols = st.columns(cols, gap="small")
         for idx, column in enumerate(button_cols):
             disabled = (
